@@ -1,4 +1,4 @@
-# SatQuery
+# SatQuery AI 
 
 SatQuery is an agentic vision-language system for interactive analysis of multimodal satellite imagery. It combines vision-language models, specialist remote-sensing models, and an orchestration layer to answer natural-language queries over satellite images, bi-temporal image pairs, and co-registered optical/SAR data.
 
