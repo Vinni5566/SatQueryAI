@@ -1,107 +1,73 @@
-import { useEffect, useState } from 'react'
-import logoDark from './assets/logos/satquery-logo-dark.png'
-import logoLight from './assets/logos/satquery-logo-light.png'
-import { Button } from './components/Button'
-import { Navbar } from './components/Navbar'
-import { ThemeToggle } from './components/ThemeToggle'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { ClerkProvider } from '@clerk/clerk-react'
+import { ThemeContext } from './ThemeContext'
+import { DesignPreviewPage } from './pages/DesignPreviewPage'
+import { HomePage } from './pages/HomePage'
+import { SignInPage } from './pages/SignInPage'
+import { SignUpPage } from './pages/SignUpPage'
+import { ROUTES } from './routes'
 import { initTheme, toggleTheme, type Theme } from './theme'
 
-const SWATCHES = [
-  { name: 'bg', className: 'bg-bg border border-border' },
-  { name: 'surface', className: 'bg-surface border border-border' },
-  { name: 'navy', className: 'bg-navy' },
-  { name: 'accent', className: 'bg-accent' },
-  { name: 'water', className: 'bg-water' },
-  { name: 'change', className: 'bg-change' },
-  { name: 'builtup', className: 'bg-builtup' },
-] as const
+const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as
+  | string
+  | undefined
 
-export default function App() {
+function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>('light')
 
   useEffect(() => {
     setTheme(initTheme())
   }, [])
 
-  function onToggleTheme() {
-    setTheme((current) => toggleTheme(current))
+  const value = useMemo(
+    () => ({
+      theme,
+      toggleTheme: () => setTheme((current) => toggleTheme(current)),
+    }),
+    [theme],
+  )
+
+  return (
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+  )
+}
+
+function MissingClerkKey() {
+  return (
+    <div className="mx-auto max-w-lg px-6 py-20 text-ink">
+      <h1 className="text-xl font-bold">Clerk publishable key missing</h1>
+      <p className="mt-3 text-sm text-muted">
+        Add <code className="text-ink">VITE_CLERK_PUBLISHABLE_KEY</code> to{' '}
+        <code className="text-ink">frontend/.env.local</code>, then restart{' '}
+        <code className="text-ink">npm run dev</code>. See{' '}
+        <code className="text-ink">.env.example</code>.
+      </p>
+    </div>
+  )
+}
+
+export default function App() {
+  if (!publishableKey) {
+    return <MissingClerkKey />
   }
 
   return (
-    <div className="min-h-screen bg-bg text-ink">
-      <Navbar theme={theme} onToggleTheme={onToggleTheme} />
-      <main className="mx-auto max-w-6xl space-y-12 px-6 py-10">
-        <section>
-          <h1 className="text-2xl font-bold text-ink">Design preview</h1>
-          <p className="mt-2 text-sm text-muted">
-            Flip theme to check tokens, buttons, and the brand logo images.
-          </p>
-        </section>
-
-        <section className="space-y-4">
-          <h2 className="text-lg font-semibold text-ink">Theme</h2>
-          <div className="flex flex-wrap items-center gap-4">
-            <ThemeToggle theme={theme} onToggle={onToggleTheme} />
-            <p className="text-sm text-muted">
-              Satellite toggle — currently{' '}
-              <span className="font-medium text-ink">{theme}</span> mode.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            {SWATCHES.map((swatch) => (
-              <div key={swatch.name} className="flex flex-col items-center gap-1.5">
-                <div
-                  className={`h-12 w-12 rounded-lg ${swatch.className}`}
-                  title={swatch.name}
-                />
-                <span className="text-xs text-muted">{swatch.name}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="space-y-4">
-          <h2 className="text-lg font-semibold text-ink">Buttons</h2>
-          <div className="flex flex-wrap gap-3">
-            <Button variant="primary">Primary</Button>
-            <Button variant="secondary">Secondary</Button>
-            <Button variant="ghost">Ghost</Button>
-          </div>
-        </section>
-
-        <section className="space-y-4">
-          <h2 className="text-lg font-semibold text-ink">Brand logo</h2>
-          <p className="text-sm text-muted">
-            Generated PNG marks in{' '}
-            <code className="text-ink">src/assets/logos/</code> — navbar swaps
-            by theme.
-          </p>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="flex items-center gap-4 rounded-lg border-2 border-border bg-white px-4 py-4">
-              <img
-                src={logoLight}
-                alt="Logo on light background"
-                className="h-16 w-16 object-contain"
-              />
-              <div>
-                <div className="text-sm font-medium text-navy">Light</div>
-                <div className="text-xs text-muted">satquery-logo-light.png</div>
-              </div>
-            </div>
-            <div className="flex items-center gap-4 rounded-lg border-2 border-border bg-[#050a14] px-4 py-4">
-              <img
-                src={logoDark}
-                alt="Logo on dark background"
-                className="h-16 w-16 object-contain"
-              />
-              <div>
-                <div className="text-sm font-medium text-white">Dark</div>
-                <div className="text-xs text-slate-400">satquery-logo-dark.png</div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
-    </div>
+    <ClerkProvider
+      publishableKey={publishableKey}
+      afterSignOutUrl={ROUTES.home}
+    >
+      <ThemeProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path={ROUTES.home} element={<HomePage />} />
+            <Route path={`${ROUTES.signIn}/*`} element={<SignInPage />} />
+            <Route path={`${ROUTES.signUp}/*`} element={<SignUpPage />} />
+            <Route path={ROUTES.design} element={<DesignPreviewPage />} />
+            <Route path="*" element={<Navigate to={ROUTES.home} replace />} />
+          </Routes>
+        </BrowserRouter>
+      </ThemeProvider>
+    </ClerkProvider>
   )
 }
