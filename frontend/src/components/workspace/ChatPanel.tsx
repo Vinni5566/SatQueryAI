@@ -16,6 +16,8 @@ type ChatPanelProps = {
   onSelectAttachment?: (id: string) => void
   onExpandChat: () => void
   busy?: boolean
+  title?: string
+  subtitle?: string
 }
 
 export function ChatPanel({
@@ -31,6 +33,8 @@ export function ChatPanel({
   onSelectAttachment,
   onExpandChat,
   busy,
+  title = 'Ask this scene',
+  subtitle = 'Attach a scene, ask a question, then Send',
 }: ChatPanelProps) {
   const endRef = useRef<HTMLDivElement>(null)
 
@@ -42,10 +46,8 @@ export function ChatPanel({
     <div className="flex h-full min-h-0 flex-col border-r border-border bg-bg">
       <div className="flex items-center justify-between border-b border-border px-4 py-3">
         <div>
-          <h2 className="text-sm font-semibold text-ink">Ask this scene</h2>
-          <p className="text-xs text-muted">
-            Attach a scene, ask a question, then Send
-          </p>
+          <h2 className="text-sm font-semibold text-ink">{title}</h2>
+          <p className="text-xs text-muted">{subtitle}</p>
         </div>
         <Button variant="ghost" className="text-xs" onClick={onExpandChat}>
           Expand chat

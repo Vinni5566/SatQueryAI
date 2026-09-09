@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 FormatKind = Literal["geotiff", "raster"]
 ModalityGuess = Literal["optical", "sar", "unknown"]
-JobType = Literal["ask_scene"]
+JobType = Literal["ask_scene", "before_after"]
 
 
 class ImageMetadata(BaseModel):

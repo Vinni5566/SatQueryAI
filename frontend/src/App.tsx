@@ -4,6 +4,8 @@ import { ClerkProvider } from '@clerk/clerk-react'
 import { ThemeContext } from './ThemeContext'
 import { DesignPreviewPage } from './pages/DesignPreviewPage'
 import { AskScenePage } from './pages/AskScenePage'
+import { ChangeScenePage } from './pages/ChangeScenePage'
+import { CloudJobPage } from './pages/JobStubPages'
 import { HomePage } from './pages/HomePage'
 import { SignInPage } from './pages/SignInPage'
 import { SignUpPage } from './pages/SignUpPage'
@@ -63,10 +65,13 @@ export default function App() {
           <Routes>
             <Route path={ROUTES.home} element={<HomePage />} />
             <Route path={ROUTES.ask} element={<AskScenePage />} />
+            <Route path={ROUTES.change} element={<ChangeScenePage />} />
+            <Route path={ROUTES.cloud} element={<CloudJobPage />} />
             <Route path={`${ROUTES.signIn}/*`} element={<SignInPage />} />
             <Route path={`${ROUTES.signUp}/*`} element={<SignUpPage />} />
             <Route path={ROUTES.design} element={<DesignPreviewPage />} />
-            <Route path="*" element={<Navigate to={ROUTES.home} replace />} />          </Routes>
+            <Route path="*" element={<Navigate to={ROUTES.home} replace />} />
+          </Routes>
         </BrowserRouter>
       </ThemeProvider>
     </ClerkProvider>

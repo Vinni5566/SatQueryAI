@@ -3,12 +3,9 @@ import { Link } from 'react-router-dom'
 import {
   SignedIn,
   SignedOut,
-  UserButton,
 } from '@clerk/clerk-react'
 import { useScroll, useTransform } from 'framer-motion'
 import { Button } from '../components/Button'
-import { Logo } from '../components/Logo'
-import { ThemeToggle } from '../components/ThemeToggle'
 import { BeneficiariesReel } from '../components/landing/BeneficiariesReel'
 import { FeatureMissions } from '../components/landing/FeatureMissions'
 import { LandingCta } from '../components/landing/LandingCta'
@@ -16,9 +13,11 @@ import { LandingHero } from '../components/landing/LandingHero'
 import { LanguageVoice } from '../components/landing/LanguageVoice'
 import { LitIndiaBackground } from '../components/landing/LitIndiaBackground'
 import { TrustStrip } from '../components/landing/TrustStrip'
+import { ThemeToggle } from '../components/ThemeToggle'
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion'
 import { useTheme } from '../ThemeContext'
 import { ROUTES } from '../routes'
+import { SignedInHomePage } from './SignedInHomePage'
 
 function LandingNav() {
   const { theme, toggleTheme } = useTheme()
@@ -133,59 +132,8 @@ export function LandingPage() {
   )
 }
 
-/** Signed-in hub kept on `/` (wireframe 10). Landing is signed-out only. */
-export function SignedInHome() {
-  const { theme, toggleTheme } = useTheme()
-
-  return (
-    <div className="min-h-screen bg-bg text-ink">
-      <header className="border-b border-border bg-bg">
-        <div className="h-0.5 w-full bg-accent" aria-hidden="true" />
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-3">
-          <Link to={ROUTES.home} className="no-underline">
-            <Logo theme={theme} />
-          </Link>
-          <div className="flex items-center gap-3">
-            <ThemeToggle theme={theme} onToggle={toggleTheme} />
-            <UserButton afterSignOutUrl={ROUTES.home} />
-          </div>
-        </div>
-      </header>
-      <main className="mx-auto max-w-6xl px-6 py-16">
-        <div className="mx-auto max-w-2xl text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-ink sm:text-4xl">
-            What do you need to know?
-          </h1>
-          <p className="mt-3 text-base text-muted">
-            Pick a job, upload pictures, and ask in plain language.
-          </p>
-          <div className="mt-10 grid gap-4 text-left sm:grid-cols-1">
-            <Link
-              to={ROUTES.ask}
-              className="rounded-xl border-2 border-navy bg-surface p-5 no-underline transition-colors hover:bg-bg dark:border-accent"
-            >
-              <div className="text-xs font-semibold text-accent">1</div>
-              <h2 className="mt-1 text-lg font-bold text-ink">
-                Ask this scene — one image
-              </h2>
-              <p className="mt-1 text-sm text-muted">
-                Describe or highlight water, fields, buildings.
-              </p>
-            </Link>
-          </div>
-          <div className="mt-6">
-            <Link to={ROUTES.design}>
-              <Button variant="ghost">Open design preview</Button>
-            </Link>
-          </div>
-        </div>
-        <p className="mt-16 text-center text-xs text-muted">
-          GeoTIFF preferred · Generic photo-chatbots are not used on pixels.
-        </p>
-      </main>
-    </div>
-  )
-}
+/** Signed-in hub kept on `/` (wireframe 10 / 60). Landing is signed-out only. */
+export { SignedInHomePage as SignedInHome } from './SignedInHomePage'
 
 export function HomeGate() {
   return (
@@ -194,7 +142,7 @@ export function HomeGate() {
         <LandingPage />
       </SignedOut>
       <SignedIn>
-        <SignedInHome />
+        <SignedInHomePage />
       </SignedIn>
     </>
   )

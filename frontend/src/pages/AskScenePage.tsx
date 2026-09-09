@@ -21,6 +21,7 @@ import {
   type SessionListItem,
   uploadSessionAsset,
 } from '../lib/api'
+import { ASK_JOB, filterAskSessions } from '../lib/sessionJob'
 import { ROUTES } from '../routes'
 
 type StoredPreview = {
@@ -134,7 +135,7 @@ function AskSceneWorkspace() {
   }, [])
 
   const refreshSessions = useCallback(async () => {
-    const rows = await listSessions(tokenFn)
+    const rows = filterAskSessions(await listSessions(tokenFn))
     setSessions(rows)
     return rows
   }, [tokenFn])
@@ -184,11 +185,11 @@ function AskSceneWorkspace() {
     let cancelled = false
     ;(async () => {
       try {
-        const rows = await listSessions(tokenFn)
+        const rows = filterAskSessions(await listSessions(tokenFn))
         if (cancelled) return
         setSessions(rows)
         if (rows.length === 0) {
-          const created = await createSession(tokenFn)
+          const created = await createSession(tokenFn, 'New chat', ASK_JOB)
           if (cancelled) return
           setSessions([created])
           selectSessionId(created.id)
@@ -223,7 +224,7 @@ function AskSceneWorkspace() {
     setBusy(true)
     setError(null)
     try {
-      const created = await createSession(tokenFn)
+      const created = await createSession(tokenFn, 'New chat', ASK_JOB)
       setSessions((prev) => [created, ...prev])
       selectSessionId(created.id)
       setMessages([WELCOME])

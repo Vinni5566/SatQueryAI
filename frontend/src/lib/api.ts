@@ -107,6 +107,7 @@ export function previewToObjectUrl(base64: string): string {
 export async function createSession(
   getToken: TokenFn,
   title = 'New chat',
+  jobType = 'ask_scene',
 ): Promise<SessionOut> {
   const res = await fetch(`${API_URL}/sessions`, {
     method: 'POST',
@@ -114,7 +115,7 @@ export async function createSession(
       ...(await authHeaders(getToken)),
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ title, job_type: 'ask_scene' }),
+    body: JSON.stringify({ title, job_type: jobType }),
   })
   if (!res.ok) throw new Error(await readError(res, 'Could not create chat'))
   return (await res.json()) as SessionOut

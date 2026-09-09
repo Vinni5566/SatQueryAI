@@ -15,6 +15,8 @@ export type ChatMessageData = {
   role: ChatRole
   text: string
   attachment?: ChatAttachment
+  /** Extra thumbs (e.g. before + after on one user turn). */
+  attachments?: ChatAttachment[]
   confidence?: number
 }
 
@@ -40,14 +42,27 @@ export function ChatMessage({
             : 'border border-border bg-surface text-ink'
         }`}
       >
-        {message.attachment ? (
+        {message.attachment || (message.attachments && message.attachments.length > 0) ? (
           <div className="mb-2">
-            <ImageThumb
-              src={message.attachment.url}
-              label={message.attachment.filename}
-              selected={activeAttachmentId === message.attachment.id}
-              onClick={() => onSelectAttachment?.(message.attachment!.id)}
-            />
+            <div className="flex flex-wrap gap-2">
+              {message.attachment ? (
+                <ImageThumb
+                  src={message.attachment.url}
+                  label={message.attachment.filename}
+                  selected={activeAttachmentId === message.attachment.id}
+                  onClick={() => onSelectAttachment?.(message.attachment!.id)}
+                />
+              ) : null}
+              {message.attachments?.map((att) => (
+                <ImageThumb
+                  key={att.id}
+                  src={att.url}
+                  label={att.filename}
+                  selected={activeAttachmentId === att.id}
+                  onClick={() => onSelectAttachment?.(att.id)}
+                />
+              ))}
+            </div>
             <p
               className={`mt-1 text-[11px] ${
                 isUser ? 'text-white/80 dark:text-navy/70' : 'text-muted'

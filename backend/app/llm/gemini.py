@@ -72,32 +72,46 @@ class GeminiLLM:
     ) -> str:
         from google.genai import types
 
-        contents: list[types.Content] = []
+        # Prefer Chat.send_message over Models.generate_content (AFC path).
+        prior: list[types.Content] = []
         for turn in history:
             role = "user" if turn.role == "user" else "model"
-            contents.append(
-                types.Content(role=role, parts=[types.Part.from_text(text=turn.text)])
+            prior.append(
+                types.Content(
+                    role=role,
+                    parts=[types.Part.from_text(text=turn.text)],
+                )
             )
 
-        parts: list[types.Part] = []
-        if image_png_bytes:
-            parts.append(
-                types.Part.from_bytes(data=image_png_bytes, mime_type="image/png")
-            )
-        parts.append(types.Part.from_text(text=user_message))
-        contents.append(types.Content(role="user", parts=parts))
-
-        response = self._client.models.generate_content(
-            model=self._model,
-            contents=contents,
-            config=types.GenerateContentConfig(
-                system_instruction=(
-                    "You are SatQuery AI, a helpful assistant for satellite imagery. "
-                    "Answer clearly about the scene when an image is provided. "
-                    "If unsure, say so. Keep answers concise."
-                ),
+        config_kwargs: dict = {
+            "system_instruction": (
+                "You are SatQuery AI, a helpful assistant for satellite imagery. "
+                "Answer clearly about the scene when an image is provided. "
+                "If unsure, say so. Keep answers concise."
             ),
+            "automatic_function_calling": types.AutomaticFunctionCallingConfig(
+                disable=True,
+            ),
+        }
+
+        chat = self._client.chats.create(
+            model=self._model,
+            history=prior,
+            config=types.GenerateContentConfig(**config_kwargs),
         )
+
+        message: str | list[types.Part]
+        if image_png_bytes:
+            message = [
+                types.Part.from_bytes(
+                    data=image_png_bytes, mime_type="image/png"
+                ),
+                types.Part.from_text(text=user_message),
+            ]
+        else:
+            message = user_message
+
+        response = chat.send_message(message)
         text = (response.text or "").strip()
         return text or "I could not generate a response."
 

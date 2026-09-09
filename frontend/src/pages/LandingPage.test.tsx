@@ -2,6 +2,42 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { ThemeContext } from '../ThemeContext'
+
+vi.mock('framer-motion', async () => {
+  const React = await import('react')
+  const actual = await vi.importActual<typeof import('framer-motion')>(
+    'framer-motion',
+  )
+  const passthrough = ({
+    children,
+    ...rest
+  }: {
+    children?: React.ReactNode
+    [key: string]: unknown
+  }) => React.createElement('div', rest, children)
+  return {
+    ...actual,
+    motion: new Proxy(actual.motion, {
+      get(target, prop) {
+        const value = target[prop as keyof typeof target]
+        if (typeof value === 'object' || typeof value === 'function') {
+          return passthrough
+        }
+        return value
+      },
+    }),
+    useScroll: () => ({
+      scrollYProgress: { on: () => () => undefined, get: () => 0 },
+    }),
+    useTransform: () => ({
+      on: () => () => undefined,
+      get: () => 0,
+    }),
+    useReducedMotion: () => true,
+    useInView: () => true,
+  }
+})
+
 import { LandingPage } from './LandingPage'
 
 function mockMatchMedia(matches = false) {
@@ -47,7 +83,7 @@ function renderLanding() {
 
 describe('LandingPage', () => {
   beforeEach(() => {
-    mockMatchMedia(true) // reduced motion → static hero, no WebGL in tests
+    mockMatchMedia(true)
     mockIntersectionObserver()
   })
 

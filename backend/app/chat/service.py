@@ -35,6 +35,26 @@ def _utcnow() -> datetime:
     return datetime.now(timezone.utc)
 
 
+_DEFAULT_CHANGE_TITLES = frozenset({"Before vs after"})
+_DEFAULT_ASK_TITLES = frozenset({"New chat"})
+
+
+def _maybe_auto_title_session(session: ChatSession, text: str) -> None:
+    """Name the chat from the first real user question (Ask + Change)."""
+    title = (session.title or "").strip()
+    is_default_ask = title in _DEFAULT_ASK_TITLES
+    is_default_change = title in _DEFAULT_CHANGE_TITLES
+    if not (is_default_ask or is_default_change):
+        return
+    cleaned = text.strip()
+    if not cleaned:
+        return
+    # Heal legacy change sessions that were stored as ask_scene.
+    if is_default_change:
+        session.job_type = "before_after"
+    session.title = cleaned[:80]
+
+
 async def create_session(
     db: AsyncSession,
     clerk_user_id: str,
@@ -416,8 +436,7 @@ async def send_message(
         created_at=_utcnow(),
     )
     session.updated_at = _utcnow()
-    if session.title == "New chat":
-        session.title = text[:80]
+    _maybe_auto_title_session(session, text)
 
     db.add(assistant_msg)
     await db.commit()

@@ -119,6 +119,29 @@ def test_upload_with_message_asks_llm(
     assert client.get(f"/sessions/{sid}").json()["title"] == "Is there a river?"
 
 
+def test_before_after_session_renames_on_first_question(
+    client: TestClient, sample_png_bytes: bytes
+) -> None:
+    created = client.post(
+        "/sessions",
+        json={"title": "Before vs after", "job_type": "before_after"},
+    ).json()
+    sid = created["id"]
+    assert created["title"] == "Before vs after"
+
+    files = {"file": ("before.png", sample_png_bytes, "image/png")}
+    client.post(f"/sessions/{sid}/assets", files=files)
+
+    res = client.post(
+        f"/sessions/{sid}/messages",
+        json={"content": "Has built-up increased?"},
+    )
+    assert res.status_code == 200
+    detail = client.get(f"/sessions/{sid}").json()
+    assert detail["title"] == "Has built-up increased?"
+    assert detail["job_type"] == "before_after"
+
+
 def test_unauthenticated_session_create() -> None:
     app.dependency_overrides.clear()
     with TestClient(app) as ac:
