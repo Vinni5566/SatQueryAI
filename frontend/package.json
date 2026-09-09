@@ -12,9 +12,15 @@
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.61.9",
+    "@react-three/drei": "^10.7.8",
+    "@react-three/fiber": "^9.7.0",
+    "framer-motion": "^13.2.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "react-router-dom": "^7.18.3"
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^7.18.3",
+    "remark-gfm": "^4.0.1",
+    "three": "^0.186.0"
   },
   "devDependencies": {
     "@clerk/types": "^4.101.26",
@@ -25,6 +31,7 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@types/react-router-dom": "^5.3.3",
+    "@types/three": "^0.185.4",
     "@vitejs/plugin-react": "^6.1.0",
     "jsdom": "^28.1.0",
     "oxlint": "^1.79.0",

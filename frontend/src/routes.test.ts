@@ -7,5 +7,6 @@ describe('routes', () => {
     expect(ROUTES.signIn).toBe('/sign-in')
     expect(ROUTES.signUp).toBe('/sign-up')
     expect(ROUTES.design).toBe('/design')
+    expect(ROUTES.ask).toBe('/ask')
   })
 })
