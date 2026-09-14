@@ -63,6 +63,53 @@ def sample_geotiff_bytes() -> bytes:
 
 
 @pytest.fixture
+def sample_sar_geotiff_bytes() -> bytes:
+    import rasterio
+    from rasterio.transform import from_origin
+
+    height, width = 48, 64
+    data = np.abs(np.random.randn(1, height, width).astype(np.float32) * 5.0 + 10.0)
+    transform = from_origin(77.0, 29.0, 0.001, 0.001)
+    buf = io.BytesIO()
+    profile = {
+        "driver": "GTiff",
+        "height": height,
+        "width": width,
+        "count": 1,
+        "dtype": "float32",
+        "crs": "EPSG:4326",
+        "transform": transform,
+    }
+    with rasterio.open(buf, "w", **profile) as dst:
+        dst.write(data)
+    return buf.getvalue()
+
+
+@pytest.fixture
+def sample_offset_geotiff_bytes() -> bytes:
+    import rasterio
+    from rasterio.transform import from_origin
+
+    height, width = 48, 64
+    data = np.ones((3, height, width), dtype=np.float32) * 500
+    # Significantly offset location (IoU < 0.8)
+    transform = from_origin(85.0, 35.0, 0.001, 0.001)
+    buf = io.BytesIO()
+    profile = {
+        "driver": "GTiff",
+        "height": height,
+        "width": width,
+        "count": 3,
+        "dtype": "float32",
+        "crs": "EPSG:4326",
+        "transform": transform,
+    }
+    with rasterio.open(buf, "w", **profile) as dst:
+        dst.write(data)
+    return buf.getvalue()
+
+
+@pytest.fixture
 def memory_storage() -> MemoryStorage:
     store = MemoryStorage()
     set_storage(store)

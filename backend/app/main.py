@@ -56,9 +56,15 @@ async def preview(file: UploadFile = File(...)) -> PreviewResponse:
 async def compatibility(
     job: JobType = Form(...),
     file: UploadFile | None = File(None),
+    files: list[UploadFile] | None = File(None),
+    query: str = Form(""),
 ) -> CompatibilityResult:
-    files: list[tuple[str, bytes]] = []
+    upload_files: list[tuple[str, bytes]] = []
     if file is not None:
         data = await file.read()
-        files.append((file.filename or "upload.bin", data))
-    return check_compatibility(job, files)
+        upload_files.append((file.filename or "upload.bin", data))
+    if files:
+        for f in files:
+            data = await f.read()
+            upload_files.append((f.filename or "upload.bin", data))
+    return check_compatibility(job, upload_files, query=query)
